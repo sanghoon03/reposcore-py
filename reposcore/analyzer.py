@@ -41,8 +41,7 @@ class RepoAnalyzer:
 
             
 
-            response = retry_request(self.SESSION, 
-                                     url,
+            response = retry_request(self.SESSION, url,
                                      max_retries=3,
                                      params={
                                          'state': 'all',
@@ -124,11 +123,11 @@ class RepoAnalyzer:
             i_d = activities.get('i_documentation', 0)
             i_fb = i_f + i_b
 
-            p_valid = p_fb + min(p_d, 3 * p_fb)
+            p_valid = p_fb + min(p_d, 3)
             i_valid = min(i_fb + i_d, 4 * p_valid)
 
             p_fb_at = min(p_fb, p_valid)
-            p_d_at = p_valid - p_fb
+            p_d_at = p_valid - p_fb_at
 
             i_fb_at = min(i_fb, i_valid)
             i_d_at = i_valid - i_fb_at
