@@ -1,4 +1,4 @@
-name: Python CI
+name: Python CI and README Sync
 
 on:
   push:
@@ -10,28 +10,68 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 리포지토리 체크아웃
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Python 환경 설정
+      # Python 환경 설정
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
           cache: 'pip'
 
-      - name: 의존성 설치
+      # 의존성 설치
+      - name: Install dependencies
         run: |
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
-      - name: pytest를 사용한 테스트 실행
+
+      # pytest를 사용한 테스트 실행
+      - name: Run tests with pytest
         run: |
           pytest tests --verbose --junitxml=test-results.xml
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-      # Push, Pull request시 테스트를 시행하고 결과를 test-results.xml로 생성함
+
+      # 테스트 결과 업로드
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results
           path: test-results.xml
+
+  update-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Python 환경 설정
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'  # 원하는 Python 버전 (3.x 추천)
+
+      # 의존성 설치
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      # README.md 파일을 자동으로 생성하는 스크립트 실행
+      - name: Generate README.md
+        run: |
+          python generate_readme.py  # 실제 구현에 맞는 스크립트 사용
+
+      # 변경된 README.md 파일을 커밋하고 푸시
+      - name: Commit updated README.md
+        run: |
+          git config --global user.name "Your GitHub Username"
+          git config --global user.email "your-email@example.com"
+          git add README.md
+          git commit -m "Update README.md automatically"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # GitHub token 사용
